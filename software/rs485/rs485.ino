@@ -1,6 +1,8 @@
 #define NUM_TLCS 2
 #include <Tlc5940.h>
 
+// A=0 B=1 C=2 D=3 E=4 F=5 G=6 H=7
+#define BOARD 3
 #define RE 5
 #define BAUD 115200
 
@@ -27,6 +29,7 @@ bool in_packet = false;
 bool reading = false;
 bool to_fire = false;
 int n = 0;
+int offset = BOARD * 4;
 
 void loop() {
   
@@ -79,12 +82,12 @@ void loop() {
     }
     
     if (csum == buf[32] && to_fire) {
-      // send bytes 0-3
+      // send 4 bytes starting at "offset"
       Tlc.clear();
       
       Serial.println("checksum OK, firing!");
       for (char s = 0; s < 32; s++) {
-        char by = s / 8;
+        char by = s / 8 + offset;
         char bi = s % 8;
         char on = (buf[by] >> bi) & 0x01;
         int val = on ? 4095 : 0;
